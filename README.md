@@ -1,6 +1,49 @@
-SDN-Based Flow Rule Timeout Manager (POX)📌 Problem StatementThe goal is to implement an SDN solution using the POX controller to manage the lifecycle of flow entries. By utilizing Idle Timeouts, the system automatically purges inactive rules from the switch's flow table, preventing resource exhaustion and ensuring efficient TCAM utilization.🛠️ Tools UsedMininet: Network Emulator.POX Controller: Python-based SDN Controller.Open vSwitch: Virtual Switch.Ubuntu: Linux VM Environment.🌐 Network TopologySingle Switch Topology: 1 Switch ($s1$) and 4 Hosts ($h1, h2, h3, h4$).Controller: Remote POX controller.⚙️ Execution StepsStep 1: Save the Controller ScriptPlace your script in the pox/ext/ directory as timeout_manager.py. Ensure your ofp_flow_mod includes:msg.idle_timeout = 20.Step 2: Start POX ControllerBashcd ~/pox
+SDN-Based Flow Rule Timeout Manager
+--------------------------------------------------------------------------------------------------------------------------------------
+📌 Problem Statement
+The goal is to implement an SDN solution using the POX controller to manage the lifecycle of flow entries. By utilizing Idle Timeouts, the system automatically purges inactive rules from the switch's flow table, preventing resource exhaustion and ensuring efficient TCAM utilization.
+--------------------------------------------------------------------------------------------------------------------------------------
+🛠️ Tools 
+Mininet: Network Emulator.
+POX Controller: Python-based SDN Controller.
+Open vSwitch: Virtual Switch.
+Ubuntu: Linux VM Environment.
+--------------------------------------------------------------------------------------------------------------------------------------
+🌐 Network TopologySingle 
+Switch Topology: 1 Switch ($s1$) and 3 Hosts ($h1, h2, h3$).
+Controller: Remote POX controller.
+--------------------------------------------------------------------------------------------------------------------------------------
+⚙️Execution Steps
+Step 1: Save the Controller Script
+Place your script in the pox/ext/ directory as timeout_manager.py. Ensure your ofp_flow_mod includes:
+msg.idle_timeout = 20
+Step 2: Start POX Controller
+Bash
+cd ~/pox
 ./pox.py log.level --DEBUG misc.timeout_manager
-Screenshot 1: Controller terminal showing "POX 0.7.0 (eel) is up" and the switch connecting.Step 3: Start MininetBashsudo mn -c
+Step 3: Start Mininet
+Bash
+sudo mn -c
 sudo mn --topo single,4 --controller=remote
-Screenshot 2: Mininet startup showing nodes $h1$ through $h4$ and $s1$.🧪 Test CasesTest ScenarioCommandExpected ResultConnectivityh1 ping -c 4 h20% packet loss.Flow Installationsh ovs-ofctl dump-flows s1Rule exists with idle_timeout=20.Rule ExpirationWait 25 SecondsFlow table becomes empty.📊 Flow Rule ImplementationEvent Handling: Controller handles PacketIn events.Match Logic: Source/Destination MAC and IP matching.Action: ofp_action_output to the correct port.Timeout: idle_timeout set to 20 seconds to manage rule lifecycle.📈 Performance & ValidationLatency: Initial ARP/PacketIn request shows higher RTT; subsequent pings use the installed flow rule.Dynamic Management: Verified that rules are only present when traffic is active, proving successful timeout-based eviction.📸 Screenshots Required for SubmissionController Startup: Showing the timeout_manager module loading.Mininet Nodes: Output of nodes and net.Active Flow: Output of dump-flows showing the idle_timeout value.Expired Flow: Output of dump-flows after waiting, showing the rule is gone.🧠 ConclusionThis project demonstrates that SDN allows for granular, automated control over switch resources. Using POX to set flow timeouts ensures that the network remains performant by preventing the accumulation of stale rules.👩‍💻 AuthorSrinidhi P
+--------------------------------------------------------------------------------------------------------------------------------------Test Cases
+Test Scenario         Command                          Expected Result
+Connectivity          h1 ping -c 4 h2                  0% packet loss.
+Flow Installation     sh ovs-ofctl dump-flows s1       Rule exists with idle_timeout=20.
+Rule ExpirationWait   25 Seconds                       Flow table becomes empty.
+--------------------------------------------------------------------------------------------------------------------------------------
+📊 Flow Rule ImplementationEvent 
+Handling: Controller handles PacketIn events.
+Match Logic: Source/Destination MAC and IP matching.
+Action: ofp_action_output to the correct port.
+Timeout: idle_timeout set to 20 seconds to manage rule lifecycle.
+--------------------------------------------------------------------------------------------------------------------------------------
+📈 Performance & ValidationLatency: 
+Initial ARP/PacketIn request shows higher RTT; subsequent pings use the installed flow rule.
+Dynamic Management: Verified that rules are only present when traffic is active, proving successful timeout-based eviction
+🧠 Conclusion
+This project demonstrates that SDN allows for granular, automated control over switch resources. Using POX to set flow timeouts ensures that the network remains performant by preventing the accumulation of stale rules.
+--------------------------------------------------------------------------------------------------------------------------------------
+👩‍💻 Author
+Srinidhi P
 PES University
+-------------------------------------------------------------------------------------------------------------------------------------
